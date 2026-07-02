@@ -24,9 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,7 +72,11 @@ public class AuthServiceImpl implements AuthService {
 
         // Step 5: Generate JWT tokens
         UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getEmail());
-        String accessToken = jwtUtil.generateAccessToken(userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("roles", user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toList()));
+        String accessToken = jwtUtil.generateAccessToken(extraClaims, userDetails);
         String refreshTokenStr = createRefreshToken(savedUser);
 
         // Step 6: Build and return response
@@ -98,7 +100,11 @@ public class AuthServiceImpl implements AuthService {
 
         // Step 3: Generate JWT tokens
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-        String accessToken = jwtUtil.generateAccessToken(userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("roles", user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toList()));
+        String accessToken = jwtUtil.generateAccessToken(extraClaims, userDetails);
 
         // Step 4: Delete old refresh token (if any) and create new one
         refreshTokenRepository.findByUser(user).ifPresent(refreshTokenRepository::delete);
@@ -127,7 +133,11 @@ public class AuthServiceImpl implements AuthService {
 
         // Step 4: Generate new access token
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-        String newAccessToken = jwtUtil.generateAccessToken(userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("roles", user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toList()));
+        String newAccessToken = jwtUtil.generateAccessToken(extraClaims, userDetails);
 
         // Step 5: Return response with SAME refresh token (not creating new one)
         return buildAuthResponse(user, newAccessToken, refreshToken);
