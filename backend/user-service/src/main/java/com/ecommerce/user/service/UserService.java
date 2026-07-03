@@ -14,4 +14,5 @@ public interface UserService {
     List<UserResponse> getAllUsers();
 
     UserResponse updateUserStatus(Long userId, boolean isEnabled);
+
 }

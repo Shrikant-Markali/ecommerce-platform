@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -70,5 +72,22 @@ public class UserController {
 
         return ResponseEntity.ok(
                 ApiResponse.success("User status updated successfully", response));
+    }
+
+    @GetMapping("/api/v1/users/by-email")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserByEmail(
+            @RequestParam String email) {
+        UserResponse response = userService.getProfile(email);
+        return ResponseEntity.ok(
+                ApiResponse.success("User fetched successfully", response));
+    }
+
+    // Internal endpoint for service-to-service calls (no auth needed)
+    @GetMapping("/api/v1/internal/users/by-email")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserByEmailInternal(
+            @RequestParam String email) {
+        UserResponse response = userService.getProfile(email);
+        return ResponseEntity.ok(
+                ApiResponse.success("User fetched successfully", response));
     }
 }
