@@ -4,6 +4,7 @@ import com.ecommerce.order.dto.request.PlaceOrderRequest;
 import com.ecommerce.order.dto.response.ApiResponse;
 import com.ecommerce.order.dto.response.OrderResponse;
 import com.ecommerce.order.entity.Order;
+import com.ecommerce.order.exception.ResourceNotFoundException;
 import com.ecommerce.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -86,4 +88,5 @@ public class OrderController {
         return ResponseEntity.ok(
                 ApiResponse.success("Order status updated successfully", order));
     }
+
 }

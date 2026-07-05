@@ -1,6 +1,6 @@
-package com.ecommerce.order.config;
+package com.ecommerce.payment.config;
 
-import com.ecommerce.order.security.JwtAuthenticationFilter;
+import com.ecommerce.payment.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,9 +43,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Actuator endpoints
+                        // PayPal callback URLs must be public
+                        // (PayPal redirects here after payment — no JWT)
+                        .requestMatchers("/api/v1/payments/success").permitAll()
+                        .requestMatchers("/api/v1/payments/cancel").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/api/v1/internal/**").permitAll()
                         // Admin only endpoints
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         // All other endpoints need authentication

@@ -20,4 +20,9 @@ public interface OrderService {
     List<OrderResponse> getAllOrders();
 
     OrderResponse updateOrderStatus(Long orderId, Order.OrderStatus status);
+
+    OrderResponse updateOrderPayment(Long orderId, String paymentId, String status);
+
+    OrderResponse getOrderByIdInternal(Long orderId);
+
 }

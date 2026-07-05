@@ -186,4 +186,29 @@ public class OrderServiceImpl implements OrderService {
                 .updatedAt(order.getUpdatedAt())
                 .build();
     }
+
+    @Override
+    @Transactional
+    public OrderResponse updateOrderPayment(Long orderId, String paymentId, String status) {
+        Order order = orderRepository.findByIdAndIsDeletedFalse(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+
+        order.setPaymentId(paymentId);
+        if (status.equals("COMPLETED")) {
+            order.setStatus(Order.OrderStatus.CONFIRMED);
+        } else if (status.equals("FAILED") || status.equals("CANCELLED")) {
+            order.setStatus(Order.OrderStatus.CANCELLED);
+        }
+
+        Order savedOrder = orderRepository.save(order);
+        return mapToOrderResponse(savedOrder);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderByIdInternal(Long orderId) {
+        Order order = orderRepository.findByIdAndIsDeletedFalse(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+        return mapToOrderResponse(order);
+    }
 }
