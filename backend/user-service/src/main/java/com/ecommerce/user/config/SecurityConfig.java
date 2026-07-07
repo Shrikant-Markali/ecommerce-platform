@@ -59,21 +59,6 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // ============================================
-    // CORS CONFIGURATION
-    // ============================================
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // React frontend
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 
     // ============================================
     // SECURITY FILTER CHAIN - MAIN CONFIGURATION
@@ -81,35 +66,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF (not needed for stateless JWT APIs)
                 .csrf(csrf -> csrf.disable())
-
-                // Enable CORS using our config above
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // Define which endpoints are public vs protected
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - no authentication needed
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/v1/internal/**").permitAll()
-
-                        // Admin only endpoints
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-
-                        // All other endpoints need authentication
                         .anyRequest().authenticated()
                 )
-
-                // No sessions - we use JWT (stateless)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Register our authentication provider
                 .authenticationProvider(authenticationProvider())
-
-                // Add our JWT filter BEFORE Spring's default auth filter
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
