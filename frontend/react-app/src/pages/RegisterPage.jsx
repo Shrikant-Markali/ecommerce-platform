@@ -138,10 +138,13 @@ const RegisterPage = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Min 8 chars, uppercase, number, special char"
+              placeholder="Enter password"
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Must contain uppercase, lowercase, number and special character (@$!%*?&)
+            </p>
           </div>
 
           {/* Submit Button */}

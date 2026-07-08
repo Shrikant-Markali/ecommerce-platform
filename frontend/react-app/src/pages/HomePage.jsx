@@ -106,6 +106,18 @@ const HomePage = () => {
       return
     }
     try {
+    console.log('Adding to cart:', productId) // Add this
+    const response = await orderService.addToCart(productId, 1)
+    console.log('Cart response:', response) // Add this
+    if (response.success) {
+      dispatch(setCart(response.data))
+      toast.success('Added to cart!')
+    }
+  } catch (error) {
+    console.error('Cart error:', error) // Add this
+    toast.error('Failed to add to cart')
+  }
+    try {
       const response = await orderService.addToCart(productId, 1)
       if (response.success) {
         dispatch(setCart(response.data))
