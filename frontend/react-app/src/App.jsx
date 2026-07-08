@@ -64,6 +64,10 @@ function App() {
             </AdminRoute>
           } />
         </Routes>
+
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+<Route path="/payment/cancel" element={<PaymentCancelPage />} />
+
         <Toaster position="top-right" />
       </div>
     </Router>
