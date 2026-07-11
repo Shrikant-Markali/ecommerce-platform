@@ -31,7 +31,8 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config
 
     // If 401 and not already retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if ((error.response?.status === 401 || error.response?.status === 403)
+       && !originalRequest._retry) {
       originalRequest._retry = true
 
       try {
@@ -51,7 +52,7 @@ axiosInstance.interceptors.response.use(
         // Refresh failed — logout user
         localStorage.clear()
         window.location.href = '/login'
-      }
+      }  
     }
     return Promise.reject(error)
   }

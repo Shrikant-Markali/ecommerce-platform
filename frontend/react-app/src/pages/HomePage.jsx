@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef  } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
@@ -23,6 +23,7 @@ const HomePage = () => {
   const { isAuthenticated } = useSelector((state) => state.auth)
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
+  const addingRef = useRef({})
 
   // Fetch categories on mount
   useEffect(() => {
@@ -100,33 +101,30 @@ const HomePage = () => {
   }
 
   const handleAddToCart = async (productId) => {
-    if (!isAuthenticated) {
-      toast.error('Please login to add items to cart')
-      navigate('/login')
-      return
-    }
-    try {
-    console.log('Adding to cart:', productId) // Add this
+  if (!isAuthenticated) {
+    toast.error('Please login to add items to cart')
+    navigate('/login')
+    return
+  }
+
+  // Prevent multiple clicks
+  if (addingRef.current[productId]) return
+  addingRef.current[productId] = true
+
+  try {
     const response = await orderService.addToCart(productId, 1)
-    console.log('Cart response:', response) // Add this
     if (response.success) {
       dispatch(setCart(response.data))
       toast.success('Added to cart!')
     }
   } catch (error) {
-    console.error('Cart error:', error) // Add this
     toast.error('Failed to add to cart')
+  } finally {
+    setTimeout(() => {
+      addingRef.current[productId] = false
+    }, 2000)
   }
-    try {
-      const response = await orderService.addToCart(productId, 1)
-      if (response.success) {
-        dispatch(setCart(response.data))
-        toast.success('Added to cart!')
-      }
-    } catch (error) {
-      toast.error('Failed to add to cart')
-    }
-  }
+} 
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -291,12 +289,12 @@ const HomePage = () => {
 
                     {/* Add to Cart Button */}
                     <button
-                      onClick={() => handleAddToCart(product.id)}
-                      disabled={product.stockQuantity === 0}
-                      className="w-full flex items-center justify-center gap-2 bg-yellow-400 text-gray-800 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                    >
-                      <ShoppingCart size={16} />
-                      Add to Cart
+                        onClick={() => handleAddToCart(product.id)}
+                        disabled={product.stockQuantity === 0}
+                        className="w-full flex items-center justify-center gap-2 bg-yellow-400 text-gray-800 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                      >
+                        <ShoppingCart size={16} />
+                        Add to Cart
                     </button>
                   </div>
                 </div>

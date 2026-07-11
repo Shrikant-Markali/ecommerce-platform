@@ -38,22 +38,36 @@ public class PaymentController {
     // PayPal redirects here after successful payment
     // Must be PUBLIC (no JWT from PayPal redirect)
     @GetMapping("/success")
-    public ResponseEntity<ApiResponse<PaymentResponse>> paymentSuccess(
+    public void paymentSuccess(
             @RequestParam("paymentId") String paypalOrderId,
-            @RequestParam("PayerID") String payerId) {
-        PaymentResponse response = paymentService.capturePayment(paypalOrderId, payerId);
-        return ResponseEntity.ok(
-                ApiResponse.success("Payment completed successfully", response));
+            @RequestParam("PayerID") String payerId,
+            jakarta.servlet.http.HttpServletResponse httpResponse) throws java.io.IOException {
+
+        try {
+            PaymentResponse response = paymentService.capturePayment(paypalOrderId, payerId);
+            if (response.getStatus().equals("COMPLETED")) {
+                httpResponse.sendRedirect("http://localhost:5173/payment/success");
+            } else {
+                httpResponse.sendRedirect("http://localhost:5173/payment/cancel");
+            }
+        } catch (Exception e) {
+            httpResponse.sendRedirect("http://localhost:5173/payment/cancel");
+        }
     }
 
-    // PayPal redirects here if customer cancels
-    // Must be PUBLIC (no JWT from PayPal redirect)
     @GetMapping("/cancel")
-    public ResponseEntity<ApiResponse<PaymentResponse>> paymentCancel(
-            @RequestParam("paymentId") String paypalOrderId) {
-        PaymentResponse response = paymentService.cancelPayment(paypalOrderId);
-        return ResponseEntity.ok(
-                ApiResponse.success("Payment cancelled", response));
+    public void paymentCancel(
+            @RequestParam(value = "paymentId", required = false) String paypalOrderId,
+            jakarta.servlet.http.HttpServletResponse httpResponse) throws java.io.IOException {
+
+        try {
+            if (paypalOrderId != null) {
+                paymentService.cancelPayment(paypalOrderId);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        httpResponse.sendRedirect("http://localhost:5173/payment/cancel");
     }
 
     @GetMapping("/order/{orderId}")
